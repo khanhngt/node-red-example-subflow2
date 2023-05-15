@@ -1,0 +1,61 @@
+{
+  "name": "red-example-subflow",
+  "version": "1.0.0",
+  "description": "no",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/khanhngt/node-red-example-subflow.git"
+  },
+  "author": "khanh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/khanhngt/node-red-example-subflow/issues"
+  },
+  "homepage": "https://github.com/khanhngt/node-red-example-subflow#readme",
+  "node-red": {
+     "nodes":{
+        "example-node": "example.js"
+     },
+     "dependencies": [
+      "node-red-contrib-ip",
+      "node-red-contrib-mqtt-broker",
+      "node-red-contrib-mqtt-connection-check",
+      "node-red-contrib-omron-fins",
+      "node-red-contrib-os",
+      "node-red-contrib-toggle",
+      "node-red-dashboard",
+      "node-red-node-email",
+      "node-red-node-mysql",
+      "node-red-node-pi-gpio",
+      "node-red-node-pi-gpiod",
+      "node-red-node-rbe",
+      "node-red-node-serialport",
+      "node-red-node-tail",
+      "node-red-omronplc"
+
+    
+     ]
+  },
+  "dependencies": {
+    "node-red-contrib-ip": "^1.0.2",
+    "node-red-contrib-mqtt-broker": "~0.2.9",
+    "node-red-contrib-mqtt-connection-check": "^0.1.2",
+    "node-red-contrib-omron-fins": "^0.5.0",
+    "node-red-contrib-os": "^0.2.1",
+    "node-red-contrib-toggle": "^0.1.1",
+    "node-red-dashboard": "^3.4.0",
+    "node-red-node-email": "^2.0.0",
+    "node-red-node-mysql": "^1.0.3",
+    "node-red-node-pi-gpio": "^2.0.6",
+    "node-red-node-pi-gpiod": "^0.4.0",
+    "node-red-node-rbe": "^0.5.0",
+    "node-red-node-serialport": "~1.0.3",
+    "node-red-node-tail": "^0.4.0",
+    "node-red-omronplc": "~1.0.2"
+
+  }
+}

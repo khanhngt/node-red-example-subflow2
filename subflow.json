@@ -1,0 +1,258 @@
+{
+    "id": "2e65901f495ecca1",
+    "type": "subflow",
+    "name": "Interval",
+    "info": "Node use to create query MySql update alarm, stop and current of operation in interval_hdvn table and insert into interval_history table.\r\n# Set parameter:\r\n - **Line name**: Name of line in database\r\n - **Operation**: Numerical order of operation in line\r\n - **Alarm, Stop, Current**: Array contains index of values alarm, stop, current in msg.payload\r\n - **Id Start**: Id start of line in interval_hdvn table.\r\n#  Input:\r\n### msg.payload is Array contains values alarm, stop, current and msg.topic corresponding\r\n_Example:_ msg.payload = [1,2,3,5,4] and msg.topic = \"alarm\" / \"current\"",
+    "category": "",
+    "in": [
+        {
+            "x": 240,
+            "y": 280,
+            "wires": [
+                {
+                    "id": "f1aeb5afdaf1f083"
+                }
+            ]
+        }
+    ],
+    "out": [
+        {
+            "x": 980,
+            "y": 280,
+            "wires": [
+                {
+                    "id": "24326d4b0d35e0a6",
+                    "port": 0
+                },
+                {
+                    "id": "cfee496609c87a31",
+                    "port": 0
+                }
+            ]
+        }
+    ],
+    "env": [
+        {
+            "name": "line",
+            "type": "str",
+            "value": "",
+            "ui": {
+                "icon": "font-awesome/fa-reply-all",
+                "label": {
+                    "en-US": "Line Name"
+                },
+                "type": "input",
+                "opts": {
+                    "types": [
+                        "str"
+                    ]
+                }
+            }
+        },
+        {
+            "name": "op",
+            "type": "num",
+            "value": "",
+            "ui": {
+                "icon": "font-awesome/fa-angle-double-right",
+                "label": {
+                    "en-US": "Operation"
+                },
+                "type": "spinner",
+                "opts": {
+                    "min": 1,
+                    "max": 9
+                }
+            }
+        },
+        {
+            "name": "alarm",
+            "type": "json",
+            "value": "{\"array\":[]}",
+            "ui": {
+                "icon": "font-awesome/fa-info-circle",
+                "label": {
+                    "en-US": "Alarm"
+                }
+            }
+        },
+        {
+            "name": "stop",
+            "type": "json",
+            "value": "{\"array\":[]}",
+            "ui": {
+                "icon": "font-awesome/fa-info-circle",
+                "label": {
+                    "en-US": "Stop"
+                }
+            }
+        },
+        {
+            "name": "current",
+            "type": "json",
+            "value": "{\"array\":[]}",
+            "ui": {
+                "icon": "font-awesome/fa-snowflake-o",
+                "label": {
+                    "en-US": "Current"
+                }
+            }
+        },
+        {
+            "name": "idStart",
+            "type": "num",
+            "value": "",
+            "ui": {
+                "icon": "font-awesome/fa-table",
+                "label": {
+                    "en-US": "Id Start"
+                },
+                "type": "input",
+                "opts": {
+                    "types": [
+                        "num"
+                    ]
+                }
+            }
+        }
+    ],
+    "meta": {
+        "module": "node-red-contrib-interval-hdvn",
+        "type": "mvpiot2020",
+        "version": "1.0.0",
+        "author": "khanhngt123@gmail.com",
+        "keywords": "node-red,mvpiot2020",
+        "license": "Apache-2.0"
+    },
+    "color": "#E6E0F8",
+    "icon": "font-awesome/fa-edit",
+    "status": {
+        "x": 820,
+        "y": 380,
+        "wires": []
+    },
+    "flow": [
+    
+        {
+            "id": "24326d4b0d35e0a6",
+            "type": "function",
+            "z": "2e65901f495ecca1",
+            "name": "data processing",
+            "func": "var alarm = env.get(\"alarm\").array;\nvar stop = env.get(\"stop\").array;\nvar id_start = env.get(\"idStart\");\nvar alarm_old = flow.get(\"alarm\");\nvar stop_old = flow.get(\"stop\");\nvar arr = msg.payload;\nmsg.topic = \"\";\n//Alarm update\nif (alarm_old){\n    for (let i = 0; i< alarm.length; i++){\n        if (arr[alarm[i]/2] != alarm_old[i]){\n            msg.topic += `UPDATE hdvn_interval SET interval_alarm='${arr[alarm[i] / 2]}' WHERE id LIKE ${i + id_start};`;\n        }\n    }\n}else{\n    for (let i = 0; i < alarm.length; i++) {\n        msg.topic += `UPDATE hdvn_interval SET interval_alarm='${arr[alarm[i] / 2]}' WHERE id LIKE ${i + id_start};`;\n    }\n}\n// Stop update\nif (stop_old) {\n    for (let i = 0; i < stop.length; i++) {\n        if (arr[stop[i] / 2] != stop_old[i]) {\n            msg.topic += `UPDATE hdvn_interval SET interval_stop='${arr[stop[i] / 2]}' WHERE id LIKE ${i + id_start};`;\n        }\n    }\n} else {\n    for (let i = 0; i < stop.length; i++) {\n        msg.topic += `UPDATE hdvn_interval SET interval_stop='${arr[stop[i] / 2]}' WHERE id LIKE ${i + id_start};`;\n    }\n}\n\n// save alarm and stop in flow variable\nvar stop_new = [];\nvar alarm_new = [];\nfor (let i = 0; i < alarm.length; i++) {\n    alarm_new.push(arr[alarm[i] / 2]);\n    stop_new.push(arr[stop[i] / 2]);\n}\nflow.set(\"alarm\",alarm_new);\nflow.set(\"stop\",stop_new);\n\nif (msg.topic != \"\") {\n    return msg;\n}",
+            "outputs": 1,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 780,
+            "y": 240,
+            "wires": [
+                []
+            ]
+        },
+        {
+            "id": "cfee496609c87a31",
+            "type": "function",
+            "z": "2e65901f495ecca1",
+            "name": "data processing",
+            "func": "var name = [\"NG Disch1 Full\", \"NG Disch2 Full\", \"Fusing Electrode Polish\", \"Fusing Electrode Change\",\n    \"Wind Load/Unload Exchange PP Chuck\", \"Pallete Lock Release Pin\", \"Wind Load/Unload Jigshin Lock Rlse\",\n    \"Ejection of defective winding state\", \"Electrode Holder Change\", \"Paper Change\", \"Cooling Water Change\",\n    \"Terminal Clamp Spring Change\", \"Terminal Clamp Change\", \"Temp Bend Punch Change\", \"Full Bend Punch Change\",\n    \"Bending Die\", \"Pitch Check Block Gauge Change\", \"Pitch Check Spring Change\", \"Continuity Check Probe\",\n    \"Continuity Check Probe Holder\", \"Unload PP TransferChuck\", \"Terminal press-fitting condition discharge chuck\",\n    \"Nozzle  1\", \"Nozzle 2\", \"Felt 1\", \"Felt 2\", \"Cutter 1\", \"Cutter 2\", \"Staking Punch 1\", \"Staking Punch 2\",\n    \"Felt Position Change 1\", \"Felt Position Change 2\", \"Tension Unit Wire Guide 1\", \"Tension Unit Wire Guide 2\",\n    \"Tension Unit O Ring 1\", \"Tension Unit O Ring 2\", \"Non-torque Roller 1\", \"Non-torque Roller 2\",\n    \"Jig Core Ball\", \"Jig Core Spring\", \"Jig Core Positioning Pin\", \"Jig Core Work Rotation Position\",\n    \"Jig Core Insert Pin\", \"SP Maintenance 1-1\", \"SP Maintenance 1-2\", \"SP Maintenance 2-1\",\n    \"SP Maintenance 2-2\", \"Wire Clamp 1\", \"Wire Clamp 2\", \"Wire Clamp Spring 1\", \"Wire Clamp Spring 2\",\n    \"SP Belt 1\", \"SP Belt 2\"];\nvar t = new Date();\nlet dateStr = (date) => (\n    (date.getFullYear()) + \"-\" +\n    (\"00\" + (date.getMonth() + 1)).slice(-2) + \"-\" +\n    (\"00\" + date.getDate()).slice(-2) + \" \" +\n    (\"00\" + date.getHours()).slice(-2) + \":\" +\n    (\"00\" + date.getMinutes()).slice(-2) + \":\" +\n    (\"00\" + date.getSeconds()).slice(-2)\n);\nvar time = dateStr(t);\n// var month = function () { if (t.getMonth() > 10) { return t.getMonth() + 1 } else { return \"0\" + (t.getMonth() + 1) } }\n// var day = function () { if (t.getDate() > 10) { return t.getDate() } else { return \"0\" + t.getDate() } }\n// var hour = function () { if (t.getHours() > 10) { return t.getHours() } else { return \"0\" + t.getHours() } }\n// var min = function () { if (t.getMinutes() > 10) { return t.getMinutes() } else { return \"0\" + t.getMinutes() } }\n// var sec = function () { if (t.getSeconds() > 10) { return t.getSeconds() } else { return \"0\" + t.getSeconds() } }\n// var time = `${t.getFullYear()}-${month()}-${day()} ${hour()}:${min()}:${sec()}`;\n\n// var current = [30,34,0,2,10,14];\nvar current = env.get(\"current\").array;\nvar id_start = env.get(\"idStart\");\nvar line = env.get(\"line\");\nvar op = env.get(\"op\");\nvar current_old = flow.get(\"current\");\nvar arr = msg.payload;\nmsg.topic = \"\";\n//Current update\nif (current_old){\n    for (let i = 0; i< current.length; i++){\n        if (arr[current[i]/2] != current_old[i]){\n            msg.topic += `UPDATE hdvn_interval SET interval_current='${arr[current[i] / 2]}' WHERE id LIKE ${i+id_start};`;\n\n            // insert history\n            if (arr[current[i] / 2] == 0){\n                msg.topic += `INSERT INTO bt_history (line_id, op_id, content, time_insert_pi) VALUES ('${line}','${op}','${name[i]}','${time}');`\n            }\n        }\n    }\n}else{\n    for (let i = 0; i < current.length; i++) {\n        msg.topic += `UPDATE hdvn_interval SET current='${arr[current[i] / 2]}' WHERE id LIKE ${i + id_start};`;\n    }\n}\n\n// save alarm and stop in flow variable\nvar current_new = [];\nfor (let i = 0; i < current.length; i++) {\n    current_new.push(arr[current[i] / 2]);\n}\nflow.set(\"current\",current_new);\n\nif (msg.topic != \"\"){\n    return msg;\n}\n",
+            "outputs": 1,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 780,
+            "y": 320,
+            "wires": [
+                []
+            ]
+        },
+        {
+            "id": "5d24114e3855be3e",
+            "type": "comment",
+            "z": "2e65901f495ecca1",
+            "name": "Interval alarm and stop",
+            "info": "",
+            "x": 800,
+            "y": 200,
+            "wires": []
+        },
+        {
+            "id": "2402ed8b36e4c41d",
+            "type": "comment",
+            "z": "2e65901f495ecca1",
+            "name": "Interval current",
+            "info": "",
+            "x": 780,
+            "y": 280,
+            "wires": []
+        },
+        {
+            "id": "f1aeb5afdaf1f083",
+            "type": "join",
+            "z": "2e65901f495ecca1",
+            "name": "",
+            "mode": "custom",
+            "build": "object",
+            "property": "payload",
+            "propertyType": "msg",
+            "key": "topic",
+            "joiner": "\\n",
+            "joinerType": "str",
+            "accumulate": true,
+            "timeout": "",
+            "count": "2",
+            "reduceRight": false,
+            "reduceExp": "",
+            "reduceInit": "",
+            "reduceInitType": "",
+            "reduceFixup": "",
+            "x": 350,
+            "y": 280,
+            "wires": [
+                [
+                    "3d1835c9ef36ad14",
+                    "1981e3259639e304"
+                ]
+            ]
+        },
+        {
+            "id": "3d1835c9ef36ad14",
+            "type": "function",
+            "z": "2e65901f495ecca1",
+            "name": "alarm and stop",
+            "func": "msg.payload = msg.payload.alarm;\nmsg.topic = \"\";\nreturn msg;",
+            "outputs": 1,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 540,
+            "y": 240,
+            "wires": [
+                [
+                    "24326d4b0d35e0a6"
+                ]
+            ]
+        },
+        {
+            "id": "1981e3259639e304",
+            "type": "function",
+            "z": "2e65901f495ecca1",
+            "name": "current",
+            "func": "msg.payload = msg.payload.current;\nmsg.topic = \"\";\nreturn msg;",
+            "outputs": 1,
+            "noerr": 0,
+            "initialize": "",
+            "finalize": "",
+            "libs": [],
+            "x": 540,
+            "y": 320,
+            "wires": [
+                [
+                    "cfee496609c87a31"
+                ]
+            ]
+        }
+    ]
+}
